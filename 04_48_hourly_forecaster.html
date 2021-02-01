@@ -148,6 +148,13 @@ var pressNum=new Array(pointNum);
 
 var zeroLine=190;//ゼロの半径分
 var showNum=0;//ユーザーの操作で強調表示を変更する。0が現在の時刻
+    
+function touchStarted() {
+    return false();
+}
+function touchEnded() {
+    return false();
+}
 
 //＜＜重要＞＞githubのファイルからAPIにアクセスする場合、頭をhttpからhttpsにする。
 request.open('GET', 'https://api.openweathermap.org/data/2.5/onecall?lat=35.6074&lon=140.1065&exclude=minutely,daily,alerts&appid=91a5ab8e9794fe2c325493f697588744&lang=ja&units=metric', true);
