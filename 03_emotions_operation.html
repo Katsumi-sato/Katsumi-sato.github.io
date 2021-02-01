@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.js"></script>
+<meta charset="utf-8">
+<title>Weather & Emotion Forecaster Prototype 01</title>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var backWidth, backHeight;
+var centx, centy;
+var pointNum=8;//この数だけ天気のデータを取得（3時間毎）、点を打つ
+
+var request = new XMLHttpRequest();
+var request_2 = new XMLHttpRequest();
+
+// var sunMin=7;
+// var sunMax=17;
+// var precMin=0;
+// var precMax=100;//感情計算機の動作確認時の値は450
+// var tempMin=10;
+// var tempMax=11;
+// var windMin=0;
+// var windMax=10;
+// var humidMin=30;
+// var humidMax=100;
+
+var sunMin=7;//日照時間だけはここから変えられない。
+var sunMax=17;
+var precMin;
+var precMax;//感情計算機の動作確認時の値は450
+var tempMin;
+var tempMax;
+var windMin;
+var windMax;
+var humidMin;
+var humidMax;
+
+
+//↓感情計算機の動作確認用の値
+// var windMin=5;
+// var windMax=25;
+// var humidMin=30;
+// var humidMax=90;
+
+var pressMin=1000;
+var pressMax=1030;
+
+// var minData;
+// var maxData;
+
+
+//6つの指標を配列で作り、[0]〜[7]の8つの配列に格納する。
+var sun=new Array(pointNum);//日照時間
+var prec=new Array(pointNum);//降水量
+var temp=new Array(pointNum);//気温
+var wind=new Array(pointNum);//風速
+var humid=new Array(pointNum);//湿度
+var press=new Array(pointNum);//気圧
+
+var emo_radius_max;//感情曲線の最大半径
+
+var radius_agg=new Array(pointNum);
+var x_agg=new Array(pointNum);
+var y_agg=new Array(pointNum);
+
+var radius_pot=new Array(pointNum);
+var x_pot=new Array(pointNum);
+var y_pot=new Array(pointNum);
+
+var radius_opt=new Array(pointNum);
+var x_opt=new Array(pointNum);
+var y_opt=new Array(pointNum);
+
+var radius_coo=new Array(pointNum);
+var x_coo=new Array(pointNum);
+var y_coo=new Array(pointNum);
+
+var radius_cont=new Array(pointNum);
+var x_cont=new Array(pointNum);
+var y_cont=new Array(pointNum);
+
+var radius_sle=new Array(pointNum);
+var x_sle=new Array(pointNum);
+var y_sle=new Array(pointNum);
+
+var radius_anx=new Array(pointNum);
+var x_anx=new Array(pointNum);
+var y_anx=new Array(pointNum);
+
+var radius_conc=new Array(pointNum);
+var x_conc=new Array(pointNum);
+var y_conc=new Array(pointNum);
+
+var radius_dep=new Array(pointNum);
+var x_dep=new Array(pointNum);
+var y_dep=new Array(pointNum);
+
+var radius_sce=new Array(pointNum);
+var x_sce=new Array(pointNum);
+var y_sce=new Array(pointNum);
+
+var angle=new Array(pointNum);
+var rad;
+
+let aggCol= '#d7231d';
+let potCol='#ed6d16';
+let optCol= '#f5d331';
+let cooCol='#90c451';
+let contCol= '#56b65b';
+let sleCol='#77c5ad';
+let anxCol='#62afca';
+let concCol='#5874b7';
+let depCol='#8a6fb0';
+let sceCol='#af6caa';
+
+var aggFlag=0;
+var potFlag=0;
+var optFlag=0;
+var cooFlag=0;
+var contFlag=0;
+var sleFlag=0;
+var anxFlag=0;
+var concFlag=0;
+var depFlag=0;
+var sceFlag=0;
+
+var zeroLine=100;//ゼロの半径分
+
+
+//お天気アイコン
+
+request.open('GET', 'http://api.openweathermap.org/data/2.5/forecast?q=Chiba&appid=91a5ab8e9794fe2c325493f697588744&units=metric', true);
+request_2.open('GET', 'http://api.openweathermap.org/data/2.5/weather?q=Chiba&appid=91a5ab8e9794fe2c325493f697588744&units=metric', true);
+
+//予報APIリクエスト//日照時間以外の5つの要素をここで格納している。
+request.onload = function() {
+if (request.status >= 200 && request.status < 400) {
+//ここでweatherAPIからJavaScript内の変数に移し替える作業をしていく。
+// Success!
+var data = JSON.parse(request.responseText);
+// for(var i=0; i<data.list.length; i++){
+for(var i=0; i<pointNum; i++){
+    prec[i]=data.list[i]['clouds']['all'];//各天気要素の配列にAPIから取得し格納していく
+    temp[i]=data.list[i]['main']['temp'];
+    wind[i]=data.list[i]['wind']['speed'];
+    humid[i]=data.list[i]['main']['humidity'];
+    press[i]=data.list[i]['main']['pressure'];
+
+    //確認のログ出力
+    console.log(i*3+ "時間後: "+ data.list[i]['dt_txt'])
+    console.log("曇り具合: "+prec[i])
+    console.log("気温: "+ temp[i])
+    console.log("風速: "+ wind[i])
+    console.log("湿度: "+ humid[i])
+    console.log("大気圧: "+ press[i])
+    console.log(" ")
+}
+} else {
+// We reached our target server, but it returned an error
+
+ }
+};
+request.onerror = function() {
+// There was a connection error of some sort
+};
+request.send();
+//予報APIリクエスト
+
+//リアルタイムAPIリクエスト//本日の日照時間を格納している。
+request_2.onload = function() {
+if (request_2.status >= 200 && request_2.status < 400) {
+    // Success!
+    var data_2 = JSON.parse(request_2.responseText);
+    for(var i=0; i<pointNum; i++){
+        sun[i]=abs(data_2.sys.sunset-data_2.sys.sunrise)/3600;
+        //サンセットのunixからサンライズのunixを引き算する。3600で割るので単位は「hour」。
+        //unixとは1970年の時点から「何秒経った」を表しているので、60*60の3600で割ることで「何時間か」を出すことができる。
+    }
+    //確認用のログ出力
+    console.log("サンライズ: " + data_2.sys.sunrise)
+    console.log("サンセット: " + data_2.sys.sunset)
+    console.log("日照時間: "+ sun[0]);//sun[0]もsun[7]も同じだけど、後々の計算が楽になりそうなので配列にしている。
+} else {
+// We reached our target server, but it returned an error
+ }
+};
+request_2.onerror = function() {
+// There was a connection error of some sort
+};
+request_2.send();
+//リアルタイムAPIリクエスト
+
+function setup(){
+    backWidth = windowWidth;
+    backHeight = windowHeight;
+    centx = backWidth / 2;
+    centy = backHeight / 2;
+    createCanvas(backWidth, backHeight*2);
+
+    emo_radius_max=Math.min(backWidth, backHeight) / 2;
+
+    var aggButton = createButton("Aggression");
+    aggButton.style("font-size", "20px");
+    aggButton.size(150, 50);
+    aggButton.position(100, backHeight+100);
+    aggButton.mousePressed(function() {
+    if (aggFlag == 0) {
+      aggFlag = 1
+    } else {
+      aggFlag = 0
+    }
+    });
+
+    var potButton = createButton("Potency");
+    potButton.style("font-size", "20px");
+    potButton.size(150, 50);
+    potButton.position(100, backHeight+150);
+    potButton.mousePressed(function() {
+    if (potFlag == 0) {
+      potFlag = 1
+    } else {
+      potFlag = 0
+    }
+    });
+
+    var optButton = createButton("Optimism");
+    optButton.style("font-size", "20px");
+    optButton.size(150, 50);
+    optButton.position(100, backHeight+200);
+    optButton.mousePressed(function() {
+    if (optFlag == 0) {
+      optFlag = 1
+    } else {
+      optFlag = 0
+    }
+    });
+
+    var cooButton = createButton("Cooperation");
+    cooButton.style("font-size", "20px");
+    cooButton.size(150, 50);
+    cooButton.position(100, backHeight+250);
+    cooButton.mousePressed(function() {
+    if (cooFlag == 0) {
+      cooFlag = 1
+    } else {
+      cooFlag = 0
+    }
+    });
+
+    var contButton = createButton("Control");
+    contButton.style("font-size", "20px");
+    contButton.size(150, 50);
+    contButton.position(100, backHeight+300);
+    contButton.mousePressed(function() {
+    if (contFlag == 0) {
+      contFlag = 1
+    } else {
+      contFlag = 0
+    }
+    });
+
+    var sleButton = createButton("Sleepiness");
+    sleButton.style("font-size", "20px");
+    sleButton.size(150, 50);
+    sleButton.position(backWidth/2, backHeight+100);
+    sleButton.mousePressed(function() {
+    if (sleFlag == 0) {
+      sleFlag = 1
+    } else {
+      sleFlag = 0
+    }
+    });
+
+    var anxButton = createButton("Anxiety");
+    anxButton.style("font-size", "20px");
+    anxButton.size(150, 50);
+    anxButton.position(backWidth/2, backHeight+150);
+    anxButton.mousePressed(function() {
+    if (anxFlag == 0) {
+      anxFlag = 1
+    } else {
+      anxFlag = 0
+    }
+    });
+
+    var concButton = createButton("Concentraion");
+    concButton.style("font-size", "20px");
+    concButton.size(150, 50);
+    concButton.position(backWidth/2, backHeight+200);
+    concButton.mousePressed(function() {
+    if (concFlag == 0) {
+        concFlag = 1
+    } else {
+        concFlag = 0
+    }
+    });
+
+    var depButton = createButton("Depression");
+    depButton.style("font-size", "20px");
+    depButton.size(150, 50);
+    depButton.position(backWidth/2, backHeight+250);
+    depButton.mousePressed(function() {
+    if (depFlag == 0) {
+        depFlag = 1
+    } else {
+        depFlag = 0
+    }
+    });
+
+    var sceButton = createButton("Scepticism");
+    sceButton.style("font-size", "20px");
+    sceButton.size(150, 50);
+    sceButton.position(backWidth/2, backHeight+300);
+    sceButton.mousePressed(function() {
+    if (sceFlag == 0) {
+        sceFlag = 1
+    } else {
+        sceFlag = 0
+    }
+    });
+
+
+    
+}
+
+function draw(){
+    //現在時刻を取得
+    const nowDate=new Date();
+    var year=nowDate.getFullYear();
+    var month=nowDate.getMonth()+1;
+    var date=nowDate.getDate();
+    var hour=nowDate.getHours();
+    var minutes=nowDate.getMinutes();
+
+    //現在時刻取得・確認の出力
+    console.log(year+" 年");
+    console.log(month+" 月");
+    console.log(date+" 日");
+    console.log(hour+" 時");
+    console.log(minutes+" 分");
+    background(0);
+
+    //感情曲線の最大値の位置と軸線を表示
+    // noFill();
+    // strokeWeight(0.3);
+    // stroke(200);
+    // ellipse(centx,centy,emo_radius_max*2,emo_radius_max*2);
+
+    // strokeWeight(0.3);
+    // for(var i=1; i<25;i++){
+    //   line(centx,centy, centx+emo_radius_max*cos(radians(360/24*i-90)), centy+emo_radius_max*sin(radians(360/24*i-90)))
+    // }
+
+    // strokeWeight(1.5);
+    // for(var i=0; i<pointNum; i++){
+    //   line(centx,centy,centx+emo_radius_max*cos(radians(360/pointNum*i+360/24*hour)),centy+emo_radius_max*sin(radians(360/pointNum*i+360/24*hour)))
+    // }
+
+    fill(40)
+    noStroke();
+    ellipse(centx,centy,emo_radius_max,emo_radius_max);
+
+    noFill();
+    strokeWeight(1);
+    stroke(200);
+    ellipse(centx,centy,zeroLine*2, zeroLine*2);
+    ellipse(centx,centy,emo_radius_max*2+zeroLine,emo_radius_max*2+zeroLine);
+
+    //配列から最大値と最小値を取得する
+    //日照時間はいらない。
+
+    //降水量
+    precMin = prec[0];
+    precMax = prec[0];
+    for (var i = 0; i < pointNum; i++) {
+    precMin = Math.min(precMin, prec[i]);
+    precMax = Math.max(precMax, prec[i]);
+    }
+
+    //気温
+    tempMin = temp[0];
+    tempMax = temp[0];
+    for (var i = 0; i < pointNum; i++) {
+    tempMin = Math.min(tempMin, temp[i]);
+    tempMax = Math.max(tempMax, temp[i]);
+    }
+
+    //湿度
+    humidMin = humid[0];
+    humidMax = humid[0];
+    for (var i = 0; i < pointNum; i++) {
+    humidMin = Math.min(humidMin, humid[i]);
+    humidMax = Math.max(humidMax, humid[i]);
+    }
+
+    //気圧
+    pressMin = press[0];
+    pressMax = press[0];
+    for (var i = 0; i < pointNum; i++) {
+    pressMin = Math.min(pressMin, press[i]);
+    pressMax = Math.max(pressMax, press[i]);
+    }
+
+    //風速
+    windMin = wind[0];
+    windMax = wind[0];
+    for (var i = 0; i < pointNum; i++) {
+    windMin = Math.min(windMin, wind[i]);
+    windMax = Math.max(windMax, wind[i]);
+    }
+    
+    
+    console.log(" ")
+    console.log("最小降水量: "+precMin);
+    console.log("最大降水量: "+precMax);
+    console.log("最小気温: "+tempMin);
+    console.log("最大気温: "+tempMax);
+    console.log("最小湿度: "+humidMin); 
+    console.log("最大湿度: "+humidMax); 
+    console.log("最小気圧: "+pressMin); 
+    console.log("最大気圧: "+pressMax); 
+    console.log("最小風速: "+windMin); 
+    console.log("最大風速: "+windMax); 
+    console.log(" ")
+
+    //感情計算機の動作確認用のログ
+    // console.log("怒り計算 0.27？: "+agg_Calculator(13.4, 145, 25.3));
+    // //なった。感情計算機の式の確認完了。
+    // console.log("pot計算 0.52？: "+pot_Calculator(13.4, 145, 25.3));
+    // console.log("opt計算 0.64？: "+opt_Calculator(13.4));
+    // console.log("coo計算 0.37？: "+coo_Calculator(12.2, 83.5));
+    // console.log("cont計算 0.32？: "+cont_Calculator(12.2));
+    // console.log("sle計算 0.77？: "+sle_Calculator(145, 25.3, 83.5, 1010));
+    // console.log("sce計算機 0.25?: "+sce_Calculator(13.4, 25.3));
+
+    //感情曲線の太さ
+    strokeWeight(5);
+
+    if(aggFlag==1){
+    //aggressionの感情曲線を描く
+    stroke(aggCol);
+    noFill();
+    beginShape();
+    curveVertex(x_agg[0], y_agg[0]);
+    for (var i = 0; i < pointNum; i++) {
+    radius_agg[i] = emo_radius_max * agg_Calculator(sun[i], prec[i],temp[i])+zeroLine;
+    angle[i] = 360 / pointNum * i-90+360/pointNum*hour/3;
+    rad = radians(angle[i]);
+    x_agg[i] = centx + radius_agg[i] * cos(rad);
+    y_agg[i] = centy + radius_agg[i] * sin(rad);
+    console.log(i+": "+agg_Calculator(sun[i], prec[i],temp[i]));
+    console.log(" ")
+    curveVertex(x_agg[i], y_agg[i]);
+    }
+    curveVertex(x_agg[pointNum-1], y_agg[pointNum-1]);
+    endShape(); 
+    fill(aggCol);
+    ellipse(x_agg[0],y_agg[0],20,20);
+    }
+
+    if(potFlag==1){
+    //potencyの感情曲線を描く
+    stroke(potCol);
+    noFill();
+    beginShape();
+    curveVertex(x_pot[0], y_pot[0]);
+    for (var i = 0; i < pointNum; i++) {
+    radius_pot[i] = emo_radius_max * pot_Calculator(sun[i], prec[i], temp[i])+zeroLine;
+    angle[i] = 360 / pointNum * i-90+360/pointNum*hour/3;
+    rad = radians(angle[i]);
+    x_pot[i] = centx + radius_pot[i] * cos(rad);
+    y_pot[i] = centy + radius_pot[i] * sin(rad);
+    curveVertex(x_pot[i], y_pot[i]);
+    }
+    curveVertex(x_pot[pointNum-1], y_pot[pointNum-1]);
+    endShape();
+    fill(potCol);
+    ellipse(x_pot[0],y_pot[0],20,20);
+    }
+
+    if(optFlag==1){
+    //optimismの感情曲線を描く
+    stroke(optCol);
+    noFill();
+    beginShape();
+    curveVertex(x_opt[0], y_opt[0]);
+    for (var i = 0; i < pointNum; i++) {
+    radius_opt[i] = emo_radius_max * opt_Calculator(sun[i])+zeroLine;
+    angle[i] = 360 / pointNum * i-90+360/pointNum*hour/3;
+    rad = radians(angle[i]);
+    x_opt[i] = centx + radius_opt[i] * cos(rad);
+    y_opt[i] = centy + radius_opt[i] * sin(rad);
+    curveVertex(x_opt[i], y_opt[i]);
+    }
+    curveVertex(x_opt[pointNum-1], y_opt[pointNum-1]);
+    endShape();
+    fill(optCol);
+    ellipse(x_opt[0],y_opt[0],20,20);
+    }
+
+    if(cooFlag==1){
+    //cooperationの感情曲線を描く
+    stroke(cooCol);
+    noFill();
+    beginShape();
+    curveVertex(x_coo[0], y_coo[0]);
+    for (var i = 0; i < pointNum; i++) {
+    radius_coo[i] = emo_radius_max * coo_Calculator(wind[i], humid[i])+zeroLine;
+    angle[i] = 360 / pointNum * i-90+360/pointNum*hour/3;
+    rad = radians(angle[i]);
+    x_coo[i] = centx + radius_coo[i] * cos(rad);
+    y_coo[i] = centy + radius_coo[i] * sin(rad);
+    curveVertex(x_coo[i], y_coo[i]);
+    }
+    curveVertex(x_coo[pointNum-1], y_coo[pointNum-1]);
+    endShape();
+    fill(cooCol);
+    ellipse(x_coo[0],y_coo[0],20,20);
+    }
+
+    if(contFlag==1){
+    //controlの感情曲線を描く
+    stroke(contCol);
+    noFill();
+    beginShape();
+    curveVertex(x_cont[0], y_cont[0]);
+    for (var i = 0; i < pointNum; i++) {
+    radius_cont[i] = emo_radius_max * cont_Calculator(wind[i])+zeroLine;
+    angle[i] = 360 / pointNum * i-90+360/pointNum*hour/3;
+    rad = radians(angle[i]);
+    x_cont[i] = centx + radius_cont[i] * cos(rad);
+    y_cont[i] = centy + radius_cont[i] * sin(rad);
+    curveVertex(x_cont[i], y_cont[i]);
+    }
+    curveVertex(x_cont[pointNum-1], y_cont[pointNum-1]);
+    endShape();
+    fill(contCol);
+    ellipse(x_cont[0],y_cont[0],20,20);
+    }
+
+    if(sleFlag==1){
+    //sleepinessの感情曲線を描く
+    stroke(sleCol);
+    noFill();
+    beginShape();
+    curveVertex(x_sle[0], y_sle[0]);
+    for (var i = 0; i < pointNum; i++) {
+    radius_sle[i] = emo_radius_max * sle_Calculator(prec[i], temp[i],humid[i], press[i])+zeroLine;
+    angle[i] = 360 / pointNum * i-90+360/pointNum*hour/3;
+    rad = radians(angle[i]);
+    x_sle[i] = centx + radius_sle[i] * cos(rad);
+    y_sle[i] = centy + radius_sle[i] * sin(rad);
+    curveVertex(x_sle[i], y_sle[i]);
+    }
+    curveVertex(x_sle[pointNum-1], y_sle[pointNum-1]);
+    endShape();
+    fill(sleCol);
+    ellipse(x_sle[0],y_sle[0],20,20);
+    }
+
+    if(anxFlag==1){
+    //anxietyの感情曲線を描く
+    stroke(anxCol);
+    noFill();
+    beginShape();
+    curveVertex(x_anx[0], y_anx[0]);
+    for (var i = 0; i < pointNum; i++) {
+    radius_anx[i] = emo_radius_max * anx_Calculator(sun[i], prec[i], temp[i])+zeroLine;
+    angle[i] = 360 / pointNum * i-90+360/pointNum*hour/3;
+    rad = radians(angle[i]);
+    x_anx[i] = centx + radius_anx[i] * cos(rad);
+    y_anx[i] = centy + radius_anx[i] * sin(rad);
+    curveVertex(x_anx[i], y_anx[i]);
+    }
+    curveVertex(x_anx[pointNum-1], y_anx[pointNum-1]);
+    endShape();
+    fill(anxCol);
+    ellipse(x_anx[0],y_anx[0],20,20);
+    }
+
+    if(concFlag==1){
+    //concentrationの感情曲線を描く
+    stroke(concCol);
+    noFill();
+    beginShape();
+    curveVertex(x_conc[0], y_conc[0]);
+    for (var i = 0; i < pointNum; i++) {
+    radius_conc[i] = emo_radius_max * conc_Calculator(temp[i], humid[i], press[i])+zeroLine;
+    angle[i] = 360 / pointNum * i-90+360/pointNum*hour/3;
+    rad = radians(angle[i]);
+    x_conc[i] = centx + radius_conc[i] * cos(rad);
+    y_conc[i] = centy + radius_conc[i] * sin(rad);
+    curveVertex(x_conc[i], y_conc[i]);
+    }
+    curveVertex(x_conc[pointNum-1], y_conc[pointNum-1]);
+    endShape();
+    fill(concCol);
+    ellipse(x_conc[0],y_conc[0],20,20);
+    }
+
+    if(depFlag==1){
+    //depressionの感情曲線を描く
+    stroke(depCol);
+    noFill();
+    beginShape();
+    curveVertex(x_dep[0], y_dep[0]);
+    for (var i = 0; i < pointNum; i++) {
+    radius_dep[i] = emo_radius_max * dep_Calculator(temp[i])+zeroLine;
+    angle[i] = 360 / pointNum * i-90+360/pointNum*hour/3;
+    rad = radians(angle[i]);
+    x_dep[i] = centx + radius_dep[i] * cos(rad);
+    y_dep[i] = centy + radius_dep[i] * sin(rad);
+    curveVertex(x_dep[i], y_dep[i]);
+    }
+    curveVertex(x_dep[pointNum-1], y_dep[pointNum-1]);
+    endShape();
+    fill(depCol);
+    ellipse(x_dep[0],y_dep[0],20,20);
+    }
+
+    if(sceFlag==1){
+    //scepticismの感情曲線を描く
+    stroke(sceCol);
+    noFill();
+    beginShape();
+    curveVertex(x_sce[0], y_sce[0]);
+    for (var i = 0; i < pointNum; i++) {
+    radius_sce[i] = emo_radius_max * sce_Calculator(sun[i], temp[i])+zeroLine;
+    angle[i] = 360 / pointNum * i-90+360/pointNum*hour/3;
+    rad = radians(angle[i]);
+    x_sce[i] = centx + radius_sce[i] * cos(rad);
+    y_sce[i] = centy + radius_sce[i] * sin(rad);
+    curveVertex(x_sce[i], y_sce[i]);
+    }
+    curveVertex(x_sce[pointNum-1], y_sce[pointNum-1]);
+    endShape();
+    fill(sceCol);
+    ellipse(x_sce[0],y_sce[0],20,20);
+    }
+
+
+//現在時刻と文字盤の表示
+
+noStroke();
+textAlign(CENTER);
+textSize(25);
+fill(255);
+text(month+"/ "+date, centx, centy-10);
+text(hour+": "+minutes, centx, centy+30);
+
+textSize(20);
+for(var i=hour; i<24+1; i++){
+    fill(255);
+    text(i, centx+(emo_radius_max-50)*cos(radians(360/24*i-90)), centy+(emo_radius_max-50)*sin(radians(360/24*i-90)))
+}
+for(var i=1; i<hour-3+1; i++){
+    fill(255);
+    text(i, centx+(emo_radius_max-50)*cos(radians(360/24*i-90)), centy+(emo_radius_max-50)*sin(radians(360/24*i-90)))
+}
+}
+
+
+function agg_Calculator(sun, prec, temp){
+    var agg_sun=-0.1*(sun-sunMin)/(sunMax-sunMin);
+    var agg_prec=0.09*(prec-precMin)/(precMax-precMin);
+    var agg_temp=-0.11*(temp-tempMin)/(tempMax-tempMin);
+    var agg_range=0.1+0.09+0.11;
+    var agg=((agg_sun+agg_prec+agg_temp)-(-0.1-0.11))/agg_range;
+    return agg;
+}
+
+function pot_Calculator(sun, prec, temp){
+    var pot_sun=-0.08*(sun-sunMin)/(sunMax-sunMin);
+    var pot_prec=0.11*(prec-precMin)/(precMax-precMin);
+    var pot_temp=0.11*(temp-tempMin)/(tempMax-tempMin);
+    var pot_range=0.08+0.11+0.11;
+    var pot=((pot_sun+pot_prec+pot_temp)-(-0.08))/pot_range;
+    return pot;
+}
+
+function opt_Calculator(sun){
+    var opt_sun=0.1*(sun-sunMin)/(sunMax-sunMin);
+    var opt_range=0.1;
+    var opt=((opt_sun)-0)/opt_range;
+    return opt;
+}
+
+function coo_Calculator(wind, humid){
+    coo_wind=-0.09*(wind-windMin)/(windMax-windMin);
+    coo_humid=-0.09*(humid-humidMin)/(humidMax-humidMin);
+    var coo_range=0.09+0.09;
+    var coo=((coo_wind+coo_humid)-(-0.18))/coo_range;
+    return coo;
+}
+
+function cont_Calculator(wind){
+    cont_wind=-0.11*(wind-windMin)/(windMax-windMin);
+    var cont_range=0.11;
+    var cont=((cont_wind)-(-0.11))/cont_range;
+    return cont;
+}
+
+function sle_Calculator(prec, temp, humid, press){
+    var sle_prec=-0.1*(prec-precMin)/(precMax-precMin);
+    var sle_temp=0.13*(temp-tempMin)/(tempMax-tempMin);
+    var sle_humid=0.1*(humid-humidMin)/(humidMax-humidMin);
+    var sle_press=-0.12*(press-pressMin)/(pressMax-pressMin);
+    var sle_range=0.1+0.13+0.1+0.12;
+    var sle=((sle_prec+sle_temp+sle_humid+sle_press)-(-0.1-0.12))/sle_range;
+    return sle;
+}
+
+function anx_Calculator(sun, prec, temp){
+    var anx_sun=-0.13*(sun-sunMin)/(sunMax-sunMin);
+    var anx_prec=0.12*(prec-precMin)/(precMax-precMin);
+    var anx_temp=-0.13*(temp-tempMin)/(tempMax-tempMin);
+    var anx_range=0.13+0.12+0.13;
+    var anx=((anx_sun+anx_prec+anx_temp)-(-0.13-0.13))/anx_range;
+    return anx;
+}
+
+function conc_Calculator(temp, humid, press){
+    var conc_temp=-0.09*(temp-tempMin)/(tempMax-tempMin);
+    var conc_humid=-0.15*(humid-humidMin)/(humidMax-humidMin);
+    var conc_press=0.1*(press-pressMin)/(pressMax-pressMin);
+    var conc_range=0.09+0.15+0.1;
+    var conc=((conc_temp+conc_humid+conc_press)-(-0.09-0.15))/conc_range;
+    return conc;
+}
+
+function dep_Calculator(temp){
+    var dep_temp=-9*(temp-tempMin)/(tempMax-tempMin);;
+    var dep_range=9;
+    var dep=((dep_temp)-(-9))/dep_range;
+    return dep;
+}
+
+function sce_Calculator(sun, temp){
+    var sce_sun=-0.11*(sun-sunMin)/(sunMax-sunMin);
+    var sce_temp=-0.13*(temp-tempMin)/(tempMax-tempMin);
+    var sce_range=0.11+0.13;
+    var sce=((sce_sun+sce_temp)-(-0.11-0.13))/sce_range;
+    return sce;
+}
+
+function maxReturn(){
+
+}
+function minReturn(){
+
+}
+
+</script>
+
+</body>
+</html>
