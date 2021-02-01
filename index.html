@@ -132,15 +132,14 @@ var zeroLine=100;//ゼロの半径分
 
 //お天気アイコン
 
-request.open('GET', 'http://api.openweathermap.org/data/2.5/forecast?q=Chiba&appid=91a5ab8e9794fe2c325493f697588744&units=metric', true);
-request_2.open('GET', 'http://api.openweathermap.org/data/2.5/weather?q=Chiba&appid=91a5ab8e9794fe2c325493f697588744&units=metric', true);
+request.open('GET', 'https://api.openweathermap.org/data/2.5/forecast?q=Chiba&appid=91a5ab8e9794fe2c325493f697588744&units=metric', true);
+request_2.open('GET', 'https://api.openweathermap.org/data/2.5/weather?q=Chiba&appid=91a5ab8e9794fe2c325493f697588744&units=metric', true);
 
 //予報APIリクエスト//日照時間以外の5つの要素をここで格納している。
 request.onload = function() {
 if (request.status >= 200 && request.status < 400) {
 //ここでweatherAPIからJavaScript内の変数に移し替える作業をしていく。
 // Success!
-    console.log("API is working.")
 var data = JSON.parse(request.responseText);
 // for(var i=0; i<data.list.length; i++){
 for(var i=0; i<pointNum; i++){
