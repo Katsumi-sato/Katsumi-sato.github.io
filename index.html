@@ -140,6 +140,7 @@ request.onload = function() {
 if (request.status >= 200 && request.status < 400) {
 //ここでweatherAPIからJavaScript内の変数に移し替える作業をしていく。
 // Success!
+    console.log("API is working.")
 var data = JSON.parse(request.responseText);
 // for(var i=0; i<data.list.length; i++){
 for(var i=0; i<pointNum; i++){
