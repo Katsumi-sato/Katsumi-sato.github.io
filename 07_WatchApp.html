@@ -547,7 +547,7 @@ function draw(){
     showNum=hour;
     for(var i=0; i<24; i++){
       var distance;
-      distance=dist(mouseX,mouseY,centx+zeroLine*cos(radians(360/24*i-90+360/24*hour)),centy+zeroLine*sin(radians(360/24*i-90+360/24*hour)));
+      distance=dist(mouseX,mouseY,centx+zeroLine*cos(radians(360/24*i-90+360/24*hour+180)),centy+zeroLine*sin(radians(360/24*i-90+360/24*hour+180)));
         if(distance<distShowNum){
           showNum=i;
           distShowNum=distance;
