@@ -189,12 +189,12 @@ for(var i=0; i<pointNum; i++){
     sun[i]=Math.abs(data.current.sunset-data.current.sunrise)/3600;
 
     //天気アイコンのためにそれぞれのNumを決定する
-    sunNum[i]=floor(map(sun[i],7,17,0,10));
-    precNum[i]=floor(map(prec[i],0,100,0,10));
-    tempNum[i]=floor(map(temp[i],0,30,0,10));
-    windNum[i]=floor(map(wind[i],0,20,0,10));
-    humidNum[i]=floor(map(humid[i],20,90,0,10));
-    pressNum[i]=floor(map(press[i],1000,1030,0,10));
+    sunNum[i]=Math.round(map(sun[i],7,17,0,10));
+    precNum[i]=Math.round(map(prec[i],0,100,0,10));
+    tempNum[i]=Math.round(map(temp[i],0,30,0,10));
+    windNum[i]=Math.round(map(wind[i],0,20,0,10));
+    humidNum[i]=Math.round(map(humid[i],20,90,0,10));
+    pressNum[i]=Math.round(map(press[i],1000,1030,0,10));
     
     //確認のログ出力
     console.log(i+  "番目の dt: "+ data.hourly[i]['dt'])
