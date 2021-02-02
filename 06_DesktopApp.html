@@ -186,7 +186,7 @@ for(var i=0; i<pointNum; i++){
     wind[i]=data.hourly[i]['wind_speed'];
     humid[i]=data.hourly[i]['humidity'];
     press[i]=data.hourly[i]['pressure'];
-    sun[i]=abs(data.current.sunset-data.current.sunrise)/3600;
+    sun[i]=Math.abs(data.current.sunset-data.current.sunrise)/3600;
 
     //天気アイコンのためにそれぞれのNumを決定する
     sunNum[i]=floor(map(sun[i],7,17,0,10));
