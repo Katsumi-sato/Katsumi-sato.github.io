@@ -6,10 +6,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600&display=swap" rel="stylesheet">
 <meta charset="utf-8">
 <title>Live Weathered Emotions Desktop</title>
+    
+  <!--CSS始まり-->
+  <style>
+  /*CSSのコメントアウト*/
+  body{background-color: #000000; /*背景の色*/}
+  </style>
+  <!--CSS終わり-->
+    
 </head>
 <body>
 
 <script type="text/javascript">
+    
+    function no_scroll() {
+    // PCでのスクロール禁止
+    document.addEventListener("mousewheel", scroll_control, { passive: false });
+    // スマホでのタッチ操作でのスクロール禁止
+    document.addEventListener("touchmove", scroll_control, { passive: false });
+    }
+
+    // スクロール関連メソッド
+    function scroll_control(event) {
+        event.preventDefault();
+    }
+    
 
 var backWidth, backHeight;
 var centx, centy;
