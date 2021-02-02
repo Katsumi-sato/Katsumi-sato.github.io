@@ -954,6 +954,13 @@ function draw(){
       //zeroLine+xは数字の表示ゼロラインから少しずらした円周の上の位置にする。
       //centy+30の+30は、文字の並びが少し上よりだったため手動で下へ下げる役割
   }
+    
+  //メニューを開いている間は黒で透過させる
+  if(menuFlag==1){
+    fill(0,200);
+    rect(0,0,backWidth,backHeight);
+  }
+
 }
 
 
