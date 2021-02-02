@@ -251,7 +251,7 @@ function setup(){
 
     emo_radius_max=Math.min(backWidth, backHeight) / 2-30;
 
-    var aggButton = createButton("Aggression");
+        var aggButton = createButton("Aggression");
     aggButton.style("font-size", "40px");
     aggButton.size(buttonWidth, buttonHeight);
     aggButton.position(centx-buttonWidth-centerMargin, topMargin+buttonAlign*0);
@@ -259,16 +259,16 @@ function setup(){
 
     aggButton.style('border-radius',"150px");
     aggButton.style('background-color',"#ffffff");
+    aggButton.style('border',"2px solid #ffffff");
+    aggButton.style('color',aggCol);
 
     aggButton.mousePressed(function() {
     if (aggFlag == 0) {
       aggFlag = 1
-      aggButton.style('color',aggCol);
       aggButton.style('background-color',"#000000");
       aggButton.style('border',"2px solid #d7231d");
     } else {
       aggFlag = 0
-      aggButton.style('color',"#000000");
       aggButton.style('background-color',"#ffffff");
       aggButton.style('border',"2px solid #ffffff");
     }
@@ -282,16 +282,16 @@ function setup(){
 
     potButton.style('border-radius',"150px");
     potButton.style('background-color',"#ffffff");
+    potButton.style('border',"2px solid #ffffff");
+    potButton.style('color',potCol);
     
     potButton.mousePressed(function() {
     if (potFlag == 0) {
       potFlag = 1
-      potButton.style('color',potCol);
       potButton.style('background-color',"#000000");
       potButton.style('border',"2px solid #ed6d16");
     } else {
       potFlag = 0
-      potButton.style('color',"#000000");
       potButton.style('background-color',"#ffffff");
       potButton.style('border',"2px solid #ffffff");
     }
@@ -305,16 +305,16 @@ function setup(){
 
     optButton.style('border-radius',"150px");
     optButton.style('background-color',"#ffffff");
+    optButton.style('border',"2px solid #ffffff");
+    optButton.style('color',optCol);
 
     optButton.mousePressed(function() {
     if (optFlag == 0) {
       optFlag = 1
-      optButton.style('color',optCol);
       optButton.style('background-color',"#000000");
       optButton.style('border',"2px solid #f5d331");
     } else {
       optFlag = 0
-      optButton.style('color',"#000000");
       optButton.style('background-color',"#ffffff");
       optButton.style('border',"2px solid #ffffff");
     }
@@ -328,16 +328,16 @@ function setup(){
 
     cooButton.style('border-radius',"150px");
     cooButton.style('background-color',"#ffffff");
+    cooButton.style('border',"2px solid #ffffff");
+    cooButton.style('color',cooCol);
 
     cooButton.mousePressed(function() {
     if (cooFlag == 0) {
       cooFlag = 1
-      cooButton.style('color',cooCol);
       cooButton.style('background-color',"#000000");
       cooButton.style('border',"2px solid #90c451");
     } else {
       cooFlag = 0
-      cooButton.style('color',"#000000");
       cooButton.style('background-color',"#ffffff");
       cooButton.style('border',"2px solid #ffffff");
     }
@@ -351,17 +351,17 @@ function setup(){
 
     contButton.style('border-radius',"150px");
     contButton.style('background-color',"#ffffff");
+    contButton.style('border',"2px solid #ffffff");
+    contButton.style('color',contCol);
 
     contButton.mousePressed(function() {
     if (contFlag == 0) {
       contFlag = 1
-      contButton.style('color',contCol);
       contButton.style('background-color',"#000000");
       contButton.style('border',"2px solid #56b65b");
 
     } else {
       contFlag = 0
-      contButton.style('color',"#000000");
       contButton.style('background-color',"#ffffff");
       contButton.style('border',"2px solid #ffffff");
     }
@@ -375,16 +375,16 @@ function setup(){
     
     sleButton.style('border-radius',"150px");
     sleButton.style('background-color',"#ffffff");
+    sleButton.style('border',"2px solid #ffffff");
+    sleButton.style('color',sleCol);
 
     sleButton.mousePressed(function() {
     if (sleFlag == 0) {
       sleFlag = 1
-      sleButton.style('color',sleCol);
       sleButton.style('background-color',"#000000");
       sleButton.style('border',"2px solid #77c5ad");
     } else {
       sleFlag = 0
-      sleButton.style('color',"#000000");
       sleButton.style('background-color',"#ffffff");
       sleButton.style('border',"2px solid #ffffff");
     }
@@ -398,16 +398,16 @@ function setup(){
 
     anxButton.style('border-radius',"150px");
     anxButton.style('background-color',"#ffffff");
+    anxButton.style('border',"2px solid #ffffff");
+    anxButton.style('color',anxCol);
 
     anxButton.mousePressed(function() {
     if (anxFlag == 0) {
       anxFlag = 1
-      anxButton.style('color',anxCol);
       anxButton.style('background-color',"#000000");
       anxButton.style('border',"2px solid #62afca");
     } else {
       anxFlag = 0
-      anxButton.style('color',"#000000");
       anxButton.style('background-color',"#ffffff");
       anxButton.style('border',"2px solid #ffffff");
     }
@@ -421,16 +421,16 @@ function setup(){
 
     concButton.style('border-radius',"150px");
     concButton.style('background-color',"#ffffff");
+    concButton.style('border',"2px solid #ffffff");
+    concButton.style('color',concCol);
 
     concButton.mousePressed(function() {
     if (concFlag == 0) {
         concFlag = 1
-        concButton.style('color',concCol);
         concButton.style('background-color',"#000000");
         concButton.style('border',"2px solid #5874b7");
     } else {
         concFlag = 0
-        concButton.style('color',"#000000");
         concButton.style('background-color',"#ffffff");
         concButton.style('border',"2px solid #ffffff");
     }
@@ -444,16 +444,16 @@ function setup(){
 
     depButton.style('border-radius',"150px");
     depButton.style('background-color',"#ffffff");
+    depButton.style('border',"2px solid #ffffff");
+    depButton.style('color',depCol);
 
     depButton.mousePressed(function() {
     if (depFlag == 0) {
         depFlag = 1
-        depButton.style('color',depCol);
         depButton.style('background-color',"#000000");
         depButton.style('border',"2px solid #8a6fb0");
     } else {
         depFlag = 0
-        depButton.style('color',"#000000");
         depButton.style('background-color',"#ffffff");
         depButton.style('border',"2px solid #ffffff");
     }
@@ -467,16 +467,16 @@ function setup(){
 
     sceButton.style('border-radius',"150px");
     sceButton.style('background-color',"#ffffff");
+    sceButton.style('border',"2px solid #ffffff");
+    sceButton.style('color',sceCol);
 
     sceButton.mousePressed(function() {
     if (sceFlag == 0) {
         sceFlag = 1
-        sceButton.style('color',sceCol);
         sceButton.style('background-color',"#000000");
         sceButton.style('border',"2px solid #af6caa");
     } else {
         sceFlag = 0
-        sceButton.style('color',"#000000");
         sceButton.style('background-color',"#ffffff");
         sceButton.style('border',"2px solid #ffffff");
     }
@@ -491,7 +491,6 @@ function setup(){
     menuButton.style('border-radius',"150px");
     menuButton.style('background-color',"#ffffff");
     menuButton.style('border',"2px solid #ffffff");
-
 
         aggButton.hide();
         potButton.hide();
