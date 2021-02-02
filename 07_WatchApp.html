@@ -936,10 +936,10 @@ function draw(){
 
   //文字盤のドット表示
   noStroke();
-  fill(150);
+  fill(100);
   for(var i=hour; i<24+hour; i++){
     if(i!=showNum+hour){
-      ellipse(centx+zeroLine*cos(radians(360/24*i-90)),centy+zeroLine*sin(radians(360/24*i-90)),10,10);
+      ellipse(centx+zeroLine*cos(radians(360/24*i-90)),centy+zeroLine*sin(radians(360/24*i-90)),5,5);
     }
   }
 
